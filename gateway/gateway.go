@@ -18,7 +18,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/grpclog"
-	"google.golang.org/grpc/reflection"
 )
 
 // getOpenAPIHandler serves an OpenAPI UI.
@@ -57,8 +56,6 @@ func Run(dialAddr string) error {
 	if err != nil {
 		return fmt.Errorf("failed to register gateway: %w", err)
 	}
-
-	reflection.Register(gwmux)
 
 	oa := getOpenAPIHandler()
 
