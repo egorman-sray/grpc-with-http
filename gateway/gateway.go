@@ -4,20 +4,21 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"io"
 	"io/fs"
-	"io/ioutil"
 	"mime"
 	"net/http"
 	"os"
 	"strings"
 
+	"github.com/egorman-sray/grpc-with-http/insecure"
+	usersv1 "github.com/egorman-sray/grpc-with-http/proto/users/v1"
+	"github.com/egorman-sray/grpc-with-http/third_party"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/johanbrandhorst/grpc-gateway-boilerplate/insecure"
-	usersv1 "github.com/johanbrandhorst/grpc-gateway-boilerplate/proto/users/v1"
-	"github.com/johanbrandhorst/grpc-gateway-boilerplate/third_party"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/grpclog"
+	"google.golang.org/grpc/reflection"
 )
 
 // getOpenAPIHandler serves an OpenAPI UI.
@@ -35,7 +36,7 @@ func getOpenAPIHandler() http.Handler {
 // Run runs the gRPC-Gateway, dialling the provided address.
 func Run(dialAddr string) error {
 	// Adds gRPC internal logs. This is quite verbose, so adjust as desired!
-	log := grpclog.NewLoggerV2(os.Stdout, ioutil.Discard, ioutil.Discard)
+	log := grpclog.NewLoggerV2(os.Stdout, io.Discard, io.Discard)
 	grpclog.SetLoggerV2(log)
 
 	// Create a client connection to the gRPC Server we just started.
@@ -49,12 +50,15 @@ func Run(dialAddr string) error {
 	if err != nil {
 		return fmt.Errorf("failed to dial server: %w", err)
 	}
+	defer conn.Close()
 
 	gwmux := runtime.NewServeMux()
 	err = usersv1.RegisterUserServiceHandler(context.Background(), gwmux, conn)
 	if err != nil {
 		return fmt.Errorf("failed to register gateway: %w", err)
 	}
+
+	reflection.Register(gwmux)
 
 	oa := getOpenAPIHandler()
 

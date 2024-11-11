@@ -1,8 +1,8 @@
 # Build stage
 FROM golang AS build-env
-ADD . /src/grpc-gateway-boilerplate
+ADD . /src/grpc-with-http
 ENV CGO_ENABLED=0
-RUN cd /src/grpc-gateway-boilerplate && go build -o /app
+RUN cd /src/grpc-with-http && go build -o /app
 
 # Production stage
 FROM scratch

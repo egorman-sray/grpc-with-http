@@ -2,10 +2,10 @@ package main
 
 import (
 	"flag"
-	"io/ioutil"
+	"io"
 	"os"
 
-	"github.com/johanbrandhorst/grpc-gateway-boilerplate/gateway"
+	"github.com/egorman-sray/grpc-with-http/gateway"
 	"google.golang.org/grpc/grpclog"
 )
 
@@ -20,7 +20,7 @@ func main() {
 	flag.Parse()
 
 	// Adds gRPC internal logs. This is quite verbose, so adjust as desired!
-	log := grpclog.NewLoggerV2(os.Stdout, ioutil.Discard, ioutil.Discard)
+	log := grpclog.NewLoggerV2(os.Stdout, io.Discard, io.Discard)
 	grpclog.SetLoggerV2(log)
 
 	err := gateway.Run(*serverAddress)
